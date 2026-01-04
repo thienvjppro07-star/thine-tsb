@@ -1141,13 +1141,214 @@ UIS.InputBegan:Connect(function(input,gp)
 end)
 
 -- Teleport R
-UIS.InputBegan:Connect(function(input,gp)
+-- SOLARA FLYCAM XUAT HON (HOAN CHINH)
+
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local CAS = game:GetService("ContextActionService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+--------------------------------------------------
+-- CONFIG
+--------------------------------------------------
+local HOLD_TIME = 0.3
+local SPEED = 90
+local SENS = 0.25
+
+--------------------------------------------------
+-- STATE
+--------------------------------------------------
+local holdingR = false
+local holdStart = 0
+local holdToken = 0
+local flyCam = false
+
+local camPos
+local lastFlyCamPos
+local yaw, pitch = 0, 0
+local conn
+
+local oldWalkSpeed, oldJumpPower, oldAutoRotate
+
+--------------------------------------------------
+-- FULL KEY LIST (A-Z + 0-9) ❌ TRỪ R
+--------------------------------------------------
+local ALL_KEYS = {
+	Enum.KeyCode.A, Enum.KeyCode.B, Enum.KeyCode.C, Enum.KeyCode.D, Enum.KeyCode.E,
+	Enum.KeyCode.F, Enum.KeyCode.G, Enum.KeyCode.H, Enum.KeyCode.I, Enum.KeyCode.J,
+	Enum.KeyCode.K, Enum.KeyCode.L, Enum.KeyCode.M, Enum.KeyCode.N, Enum.KeyCode.O,
+	Enum.KeyCode.P,
+	Enum.KeyCode.Q, -- block Q cho nhân vật
+	Enum.KeyCode.S, Enum.KeyCode.T, Enum.KeyCode.U, Enum.KeyCode.V,
+	Enum.KeyCode.W, Enum.KeyCode.X, Enum.KeyCode.Y, Enum.KeyCode.Z,
+
+	Enum.KeyCode.Zero, Enum.KeyCode.One, Enum.KeyCode.Two, Enum.KeyCode.Three,
+	Enum.KeyCode.Four, Enum.KeyCode.Five, Enum.KeyCode.Six,
+	Enum.KeyCode.Seven, Enum.KeyCode.Eight, Enum.KeyCode.Nine,
+}
+
+--------------------------------------------------
+-- BLOCK / UNBLOCK INPUT
+--------------------------------------------------
+local function blockAllKeys()
+	for _, key in ipairs(ALL_KEYS) do
+		CAS:BindAction(
+			"Block_" .. key.Name,
+			function() return Enum.ContextActionResult.Sink end,
+			false,
+			key
+		)
+	end
+end
+
+local function unblockAllKeys()
+	for _, key in ipairs(ALL_KEYS) do
+		CAS:UnbindAction("Block_" .. key.Name)
+	end
+end
+
+--------------------------------------------------
+-- FLYCAM CORE
+--------------------------------------------------
+local function enableFlyCam()
+	flyCam = true
+	lastFlyCamPos = nil
+	print("[FlyCam] ON")
+
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+	local hrp = char and char:FindFirstChild("HumanoidRootPart")
+
+	if hum then
+		oldWalkSpeed = hum.WalkSpeed
+		oldJumpPower = hum.JumpPower
+		oldAutoRotate = hum.AutoRotate
+
+		hum.WalkSpeed = 0
+		hum.JumpPower = 0
+		hum.AutoRotate = false
+	end
+
+	if hrp then
+		hrp.AssemblyLinearVelocity = Vector3.zero
+		camPos = hrp.Position
+	else
+		camPos = camera.CFrame.Position
+	end
+
+	blockAllKeys()
+
+	camera.CameraType = Enum.CameraType.Scriptable
+	UIS.MouseBehavior = Enum.MouseBehavior.LockCenter
+	UIS.MouseIconEnabled = false
+
+	yaw, pitch = 0, 0
+
+	conn = RunService.RenderStepped:Connect(function(dt)
+		local delta = UIS:GetMouseDelta()
+		yaw -= delta.X * SENS
+		pitch = math.clamp(pitch - delta.Y * SENS, -80, 80)
+
+		local rot =
+			CFrame.Angles(0, math.rad(yaw), 0) *
+			CFrame.Angles(math.rad(pitch), 0, 0)
+
+		local dir = Vector3.zero
+		if UIS:IsKeyDown(Enum.KeyCode.W) then dir += rot.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.S) then dir -= rot.LookVector end
+		if UIS:IsKeyDown(Enum.KeyCode.A) then dir -= rot.RightVector end
+		if UIS:IsKeyDown(Enum.KeyCode.D) then dir += rot.RightVector end
+		if UIS:IsKeyDown(Enum.KeyCode.E) then dir += Vector3.new(0,1,0) end
+		if UIS:IsKeyDown(Enum.KeyCode.Q) then dir -= Vector3.new(0,1,0) end
+
+		if dir.Magnitude > 0 then
+			camPos += dir.Unit * SPEED * dt
+		end
+
+		lastFlyCamPos = camPos
+		camera.CFrame = CFrame.new(camPos) * rot
+	end)
+end
+
+local function disableFlyCam()
+	print("[FlyCam] OFF")
+
+	if conn then
+		conn:Disconnect()
+		conn = nil
+	end
+
+	unblockAllKeys()
+
+	UIS.MouseBehavior = Enum.MouseBehavior.Default
+	UIS.MouseIconEnabled = true
+	camera.CameraType = Enum.CameraType.Custom
+
+	local char = player.Character
+	local hum = char and char:FindFirstChildOfClass("Humanoid")
+
+	if hum then
+		hum.WalkSpeed = oldWalkSpeed or 16
+		hum.JumpPower = oldJumpPower or 50
+		hum.AutoRotate = (oldAutoRotate ~= false)
+	end
+
+	flyCam = false
+end
+
+--------------------------------------------------
+-- INPUT HOLD R (ANTI-SPAM)
+--------------------------------------------------
+UIS.InputBegan:Connect(function(input, gp)
 	if gp then return end
+	if input.KeyCode ~= Enum.KeyCode.R then return end
+
+	-- ĐANG FLYCAM → TẮT + TELE TỚI FLYCAM
+	if flyCam then
+		local pos = lastFlyCamPos
+		disableFlyCam()
+		if pos then
+			doTeleport(pos + Vector3.new(0, 2.5, 0))
+		end
+		return
+	end
+
+	holdingR = true
+	holdStart = tick()
+	holdToken += 1
+	local myToken = holdToken
+
+	task.delay(HOLD_TIME, function()
+		if holdingR
+			and holdToken == myToken
+			and not flyCam
+			and (tick() - holdStart) >= HOLD_TIME
+		then
+			enableFlyCam()
+		end
+	end)
+end)
+
+UIS.InputEnded:Connect(function(input)
 	if input.KeyCode == Enum.KeyCode.R then
-		local pos = mouse.Hit.p + Vector3.new(0,2.5,0)
+		holdingR = false
+	end
+end)
+
+--------------------------------------------------
+-- TELEPORT SCRIPT GỐC (BẤM R NHANH)
+--------------------------------------------------
+UIS.InputBegan:Connect(function(input, gp)
+	if gp then return end
+	if input.KeyCode == Enum.KeyCode.R and not flyCam then
+		local pos = mouse.Hit.p + Vector3.new(0, 2.5, 0)
 		doTeleport(pos)
 	end
 end)
+
 
 -- Teleport T
 local function getNearestPlayer()
