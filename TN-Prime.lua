@@ -98,6 +98,110 @@ systemPart:GetPropertyChangedSignal("Parent"):Connect(function()
 	end
 end)
 
+--------------------------------------------------
+-- MOBILE R BUTTON (TOGGLE TELE MODE + DRAGGABLE)
+--------------------------------------------------
+local teleMode = false
+
+-- GUI
+local gui = Instance.new("ScreenGui")
+gui.Name = "MobileRTele"
+gui.ResetOnSpawn = false
+gui.Parent = player:WaitForChild("PlayerGui")
+
+local rBtn = Instance.new("TextButton")
+rBtn.Size = UDim2.new(0, 70, 0, 70)
+rBtn.Position = UDim2.new(1, -90, 1, -180)
+rBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+rBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+rBtn.TextScaled = true
+rBtn.Font = Enum.Font.GothamBold
+rBtn.Text = "R"
+rBtn.AutoButtonColor = false
+rBtn.Parent = gui
+rBtn.Visible = UIS.TouchEnabled
+
+local corner = Instance.new("UICorner", rBtn)
+corner.CornerRadius = UDim.new(0, 14)
+
+--------------------------------------------------
+-- BUTTON STATE COLOR
+--------------------------------------------------
+local function updateBtn()
+	if teleMode then
+		rBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	else
+		rBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	end
+end
+updateBtn()
+
+--------------------------------------------------
+-- TOGGLE TELE MODE
+--------------------------------------------------
+rBtn.MouseButton1Click:Connect(function()
+	if flyCam then return end
+	teleMode = not teleMode
+	updateBtn()
+end)
+
+--------------------------------------------------
+-- DRAG LOGIC (MOBILE)
+--------------------------------------------------
+local dragging = false
+local dragStart
+local startPos
+
+local function updateDrag(input)
+	local delta = input.Position - dragStart
+	rBtn.Position = UDim2.new(
+		startPos.X.Scale,
+		startPos.X.Offset + delta.X,
+		startPos.Y.Scale,
+		startPos.Y.Offset + delta.Y
+	)
+end
+
+rBtn.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = rBtn.Position
+	end
+end)
+
+rBtn.InputEnded:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch then
+		dragging = false
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.Touch then
+		updateDrag(input)
+	end
+end)
+
+--------------------------------------------------
+-- TOUCH MAP TO TELEPORT
+--------------------------------------------------
+UIS.TouchTap:Connect(function(pos, gp)
+	if not teleMode then return end
+	if flyCam then return end
+	if gp then return end
+
+	local ray = camera:ViewportPointToRay(pos.X, pos.Y)
+	local params = RaycastParams.new()
+	params.FilterDescendantsInstances = {player.Character}
+	params.FilterType = Enum.RaycastFilterType.Blacklist
+
+	local result = workspace:Raycast(ray.Origin, ray.Direction * 1000, params)
+	if result then
+		doTeleport(result.Position + Vector3.new(0, 2.5, 0))
+	end
+end)
+
+
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local RunService = game:GetService("RunService")
