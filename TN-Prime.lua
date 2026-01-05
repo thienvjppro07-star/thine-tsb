@@ -91,12 +91,236 @@ systemPart.Transparency = 1
 systemPart.Name = "SoloSystemUI"
 systemPart.Parent = workspace
 
--- Bảo vệ khỏi Destroy
 systemPart:GetPropertyChangedSignal("Parent"):Connect(function()
 	if not systemPart.Parent then
 		systemPart.Parent = workspace
 	end
 end)
+
+--------------------------------------------------
+-- 🌐 SURFACE GUI (DÙNG CHUNG PC + MOBILE)
+--------------------------------------------------
+local surfaceGui = Instance.new("SurfaceGui", systemPart)
+surfaceGui.Face = Enum.NormalId.Front
+surfaceGui.AlwaysOnTop = true
+surfaceGui.LightInfluence = 0
+surfaceGui.SizingMode = Enum.SurfaceGuiSizingMode.PixelsPerStud
+surfaceGui.PixelsPerStud = 80 -- 👈 chỉnh tổng size UI (70–100)
+
+--------------------------------------------------
+-- FRAME
+--------------------------------------------------
+local frame = Instance.new("Frame", surfaceGui)
+frame.Size = UDim2.fromScale(1, 1)
+frame.BackgroundColor3 = Color3.fromRGB(10,15,25)
+frame.BackgroundTransparency = 0.15
+Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 16)
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(0,200,255)
+stroke.Thickness = 2
+stroke.Transparency = 0.2
+
+--------------------------------------------------
+-- TITLE
+--------------------------------------------------
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.fromScale(0.9, 0.18)
+title.Position = UDim2.fromScale(0.05, 0.05)
+title.BackgroundTransparency = 1
+title.Text = "NOTIFICATION"
+title.Font = Enum.Font.GothamBold
+title.TextScaled = true
+title.TextColor3 = Color3.fromRGB(255,215,0)
+
+--------------------------------------------------
+-- MESSAGE
+--------------------------------------------------
+local msg = Instance.new("TextLabel", frame)
+msg.Size = UDim2.fromScale(0.9, 0.35)
+msg.Position = UDim2.fromScale(0.05, 0.25)
+msg.BackgroundTransparency = 1
+msg.TextWrapped = true
+msg.TextScaled = true
+msg.TextYAlignment = Enum.TextYAlignment.Top
+msg.Text = "You have acquired the qualifications to be a Player.\nWill you accept?"
+msg.Font = Enum.Font.Gotham
+msg.TextColor3 = Color3.fromRGB(220,220,220)
+
+--------------------------------------------------
+-- BUTTON CONTAINER
+--------------------------------------------------
+local btnHolder = Instance.new("Frame", frame)
+btnHolder.Size = UDim2.fromScale(0.9, 0.22)
+btnHolder.Position = UDim2.fromScale(0.05, 0.72)
+btnHolder.BackgroundTransparency = 1
+
+local layout = Instance.new("UIListLayout", btnHolder)
+layout.FillDirection = Enum.FillDirection.Horizontal
+layout.HorizontalAlignment = Enum.HorizontalAlignment.Center
+layout.Padding = UDim.new(0.05, 0)
+
+--------------------------------------------------
+-- ACCEPT BUTTON
+--------------------------------------------------
+local accept = Instance.new("TextButton", btnHolder)
+accept.Size = UDim2.fromScale(0.45, 1)
+accept.Text = "ACCEPT"
+accept.Font = Enum.Font.GothamBold
+accept.TextScaled = true
+accept.BackgroundColor3 = Color3.fromRGB(255,215,0)
+accept.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", accept).CornerRadius = UDim.new(0,14)
+
+--------------------------------------------------
+-- DECLINE BUTTON
+--------------------------------------------------
+local decline = Instance.new("TextButton", btnHolder)
+decline.Size = UDim2.fromScale(0.45, 1)
+decline.Text = "DECLINE"
+decline.Font = Enum.Font.GothamBold
+decline.TextScaled = true
+decline.BackgroundColor3 = Color3.fromRGB(50,50,50)
+decline.TextColor3 = Color3.new(1,1,1)
+Instance.new("UICorner", decline).CornerRadius = UDim.new(0,14)
+
+--------------------------------------------------
+-- BUTTON LOGIC (PC + MOBILE)
+--------------------------------------------------
+accept.Activated:Connect(function()
+	_G.SOLO_ACCEPTED = true
+	surfaceGui:Destroy()
+
+	task.delay(3.5, function()
+		if systemPart and systemPart.Parent then
+			systemPart:Destroy()
+		end
+	end)
+end)
+
+decline.Activated:Connect(function()
+	_G.SOLO_DECLINED = true
+	surfaceGui:Destroy()
+
+	if systemPart and systemPart.Parent then
+		systemPart:Destroy()
+	end
+end)
+
+--------------------------------------------------
+-- XOAY PART THEO CAMERA
+--------------------------------------------------
+local DISTANCE, HEIGHT, ROTATE_SMOOTH = 6, 2.5, 0.08
+local currentCF = systemPart.CFrame
+
+RunService.RenderStepped:Connect(function()
+	if not systemPart.Parent then return end
+	local targetPos = hrp.Position + hrp.CFrame.LookVector * DISTANCE + Vector3.new(0, HEIGHT, 0)
+	local targetCF = CFrame.lookAt(targetPos, hrp.Position + Vector3.new(0, HEIGHT, 0))
+	currentCF = currentCF:Lerp(targetCF, ROTATE_SMOOTH)
+	systemPart.CFrame = currentCF
+end)
+
+--------------------------------------------------
+-- ⏳ CHỜ ACCEPT
+--------------------------------------------------
+repeat task.wait() until _G.SOLO_ACCEPTED
+
+--------------------------------------------------
+-- 🔹 LOADER SAU ACCEPT
+--------------------------------------------------
+local player = game.Players.LocalPlayer
+local systemPart = workspace:WaitForChild("SoloSystemUI")
+
+-- Loader SurfaceGui
+local loaderGui = Instance.new("SurfaceGui", systemPart)
+loaderGui.Face = Enum.NormalId.Front
+loaderGui.AlwaysOnTop = true
+loaderGui.LightInfluence = 0
+loaderGui.CanvasSize = Vector2.new(300, 150)
+
+local loaderFrame = Instance.new("Frame", loaderGui)
+loaderFrame.Size = UDim2.new(1,0,1,0)
+loaderFrame.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
+loaderFrame.BackgroundTransparency = 1
+Instance.new("UICorner", loaderFrame).CornerRadius = UDim.new(0,10)
+
+local loaderTitle = Instance.new("TextLabel", loaderFrame)
+loaderTitle.Size = UDim2.new(1,0,0,40)
+loaderTitle.Position = UDim2.new(0,0,0,10)
+loaderTitle.BackgroundTransparency = 1
+loaderTitle.TextColor3 = Color3.new(255,215,0)
+loaderTitle.Font = Enum.Font.SourceSansBold
+loaderTitle.TextSize = 26
+loaderTitle.Text = "Thinne Hub"
+loaderTitle.TextTransparency = 1
+
+local stroke = Instance.new("UIStroke", frame)
+stroke.Color = Color3.fromRGB(0, 200, 255)
+stroke.Thickness = 3
+stroke.Transparency = 1
+
+local loading = Instance.new("TextLabel", loaderFrame)
+loading.Size = UDim2.new(1,0,0,30)
+loading.Position = UDim2.new(0,0,1,-40)
+loading.BackgroundTransparency = 1
+loading.TextColor3 = Color3.new(1,1,1)
+loading.Font = Enum.Font.SourceSans
+loading.TextSize = 20
+loading.Text = "Loading..."
+loading.TextTransparency = 1
+
+-- FADE IN LOADER
+for i=0,1,0.05 do
+	loaderFrame.BackgroundTransparency = 1-i
+	loaderTitle.TextTransparency = 1-i
+	loading.TextTransparency = 1-i
+	task.wait(0.03)
+end
+
+task.wait(1)
+loading.Text = "Loading Complete!"
+loading.TextColor3 = Color3.fromRGB(0,255,0)
+task.wait(0.5)
+for i=0,1,0.05 do
+	loaderFrame.BackgroundTransparency = i
+	loaderTitle.TextTransparency = i
+	loading.TextTransparency = i
+	task.wait(0.03)
+end
+
+-- Xóa Loader
+loaderGui:Destroy()
+
+--------------------------------------------------
+-- 🔹 ANIMATIONS CHO NHÂN VẬT
+--------------------------------------------------
+local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+
+local teleAnim = Instance.new("Animation")
+teleAnim.AnimationId = "rbxassetid://15957361339"
+local teleTrack = animator:LoadAnimation(teleAnim)
+teleTrack.Priority = Enum.AnimationPriority.Action
+
+local flyAnim = Instance.new("Animation")
+flyAnim.AnimationId = "rbxassetid://134743839442030"
+local flyTrack = animator:LoadAnimation(flyAnim)
+flyTrack.Priority = Enum.AnimationPriority.Action
+flyTrack.Looped = true
+
+player.CharacterAdded:Connect(function(char)
+	humanoid = char:WaitForChild("Humanoid")
+	animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
+
+	teleTrack = animator:LoadAnimation(teleAnim)
+	teleTrack.Priority = Enum.AnimationPriority.Action
+
+	flyTrack = animator:LoadAnimation(flyAnim)
+	flyTrack.Priority = Enum.AnimationPriority.Action
+	flyTrack.Looped = true
+end)
+
+print("🔥 Solo Leveling System Accepted")
 
 --------------------------------------------------
 -- MOBILE R BUTTON (TOGGLE TELE MODE + DRAGGABLE)
@@ -231,214 +455,6 @@ end
 gui.ResetOnSpawn = false
 gui.Parent = systemPart
 
--- FRAME
-local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(1,0,1,0)
-frame.BackgroundColor3 = Color3.fromRGB(10,15,25)
-frame.BackgroundTransparency = 0.2
-Instance.new("UICorner", frame).CornerRadius = UDim.new(0,18)
-
--- TITLE
-local title = Instance.new("TextLabel", frame)
-title.Size = UDim2.new(1,-40,0,60)
-title.Position = UDim2.new(0,20,0,20)
-title.BackgroundTransparency = 1
-title.Text = "NOTIFICATION"
-title.Font = Enum.Font.GothamBold
-title.TextSize = 36
-title.TextColor3 = Color3.fromRGB(255,215,0)
-title.TextXAlignment = Enum.TextXAlignment.Left
-
--- MESSAGE
-local msg = Instance.new("TextLabel", frame)
-msg.Size = UDim2.new(1,-40,0,120)
-msg.Position = UDim2.new(0,20,0,90)
-msg.BackgroundTransparency = 1
-msg.TextWrapped = true
-msg.TextYAlignment = Enum.TextYAlignment.Top
-msg.Text = "You have acquired the qualifications to be a Player.\nWill you accept?"
-msg.Font = Enum.Font.Gotham
-msg.TextSize = 28
-msg.TextColor3 = Color3.fromRGB(220,220,220)
-
--- BUTTONS
-local accept = Instance.new("TextButton", frame)
-accept.Size = UDim2.new(0,240,0,60)
-accept.Position = UDim2.new(0.15,0,1,-90)
-accept.Text = "ACCEPT"
-accept.Font = Enum.Font.GothamBold
-accept.TextSize = 30
-accept.BackgroundColor3 = Color3.fromRGB(255,215,0)
-accept.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", accept).CornerRadius = UDim.new(0,14)
-
-local decline = Instance.new("TextButton", frame)
-decline.Size = UDim2.new(0,240,0,60)
-decline.Position = UDim2.new(0.55,0,1,-90)
-decline.Text = "DECLINE"
-decline.Font = Enum.Font.GothamBold
-decline.TextSize = 30
-decline.BackgroundColor3 = Color3.fromRGB(50,50,50)
-decline.TextColor3 = Color3.new(1,1,1)
-Instance.new("UICorner", decline).CornerRadius = UDim.new(0,14)
-
--- LOGIC
-accept.MouseButton1Click:Connect(function()
-    _G.SOLO_ACCEPTED = true
-    if gui then gui:Destroy() end
-    task.delay(3.5, function()
-        if systemPart and systemPart.Parent then systemPart:Destroy() end
-    end)
-end)
-
-decline.MouseButton1Click:Connect(function()
-    _G.SOLO_DECLINED = true
-    if gui then gui:Destroy() end
-    if systemPart and systemPart.Parent then systemPart:Destroy() end
-end)
-
--- XOAY PART (PC vẫn dùng)
-local DISTANCE, HEIGHT, ROTATE_SMOOTH = 6, 2.5, 0.08
-local currentCF = systemPart.CFrame
-RunService.RenderStepped:Connect(function()
-    if not systemPart or not systemPart.Parent or not hrp then return end
-    local targetPos = hrp.Position + hrp.CFrame.LookVector * DISTANCE + Vector3.new(0, HEIGHT, 0)
-    local targetCF = CFrame.lookAt(targetPos, hrp.Position + Vector3.new(0, HEIGHT, 0))
-    currentCF = currentCF:Lerp(targetCF, ROTATE_SMOOTH)
-    systemPart.CFrame = currentCF
-end)
-
-
---------------------------------------------------
--- BUTTON LOGIC
---------------------------------------------------
-accept.MouseButton1Click:Connect(function()
-	_G.SOLO_ACCEPTED = true
-
-	-- Xóa notification ngay
-	if surfaceGui then
-		surfaceGui:Destroy()
-	end
-
-	-- Delay 3-4 giây rồi xóa systemPart
-	task.delay(3.5, function()
-		if systemPart and systemPart.Parent then
-			systemPart:Destroy()
-		end
-	end)
-end)
-
-
-decline.MouseButton1Click:Connect(function()
-	_G.SOLO_DECLINED = true -- đánh dấu đã từ chối
-	if surfaceGui then
-		surfaceGui:Destroy()
-	end
-	if systemPart and systemPart.Parent then
-		systemPart:Destroy() -- xóa luôn part
-	end
-end)
-
---------------------------------------------------
--- CHỜ ACCEPT
---------------------------------------------------
-repeat task.wait() until _G.SOLO_ACCEPTED
-
---------------------------------------------------
--- 🔹 LOADER SAU ACCEPT
---------------------------------------------------
-local player = game.Players.LocalPlayer
-local systemPart = workspace:WaitForChild("SoloSystemUI")
-
--- Loader SurfaceGui
-local loaderGui = Instance.new("SurfaceGui", systemPart)
-loaderGui.Face = Enum.NormalId.Front
-loaderGui.AlwaysOnTop = true
-loaderGui.LightInfluence = 0
-loaderGui.CanvasSize = Vector2.new(300, 150)
-
-local loaderFrame = Instance.new("Frame", loaderGui)
-loaderFrame.Size = UDim2.new(1,0,1,0)
-loaderFrame.BackgroundColor3 = Color3.fromRGB(10, 15, 25)
-loaderFrame.BackgroundTransparency = 1
-Instance.new("UICorner", loaderFrame).CornerRadius = UDim.new(0,10)
-
-local loaderTitle = Instance.new("TextLabel", loaderFrame)
-loaderTitle.Size = UDim2.new(1,0,0,40)
-loaderTitle.Position = UDim2.new(0,0,0,10)
-loaderTitle.BackgroundTransparency = 1
-loaderTitle.TextColor3 = Color3.new(255,215,0)
-loaderTitle.Font = Enum.Font.SourceSansBold
-loaderTitle.TextSize = 26
-loaderTitle.Text = "Thinne Hub"
-loaderTitle.TextTransparency = 1
-
-local stroke = Instance.new("UIStroke", frame)
-stroke.Color = Color3.fromRGB(0, 200, 255)
-stroke.Thickness = 3
-stroke.Transparency = 1
-
-local loading = Instance.new("TextLabel", loaderFrame)
-loading.Size = UDim2.new(1,0,0,30)
-loading.Position = UDim2.new(0,0,1,-40)
-loading.BackgroundTransparency = 1
-loading.TextColor3 = Color3.new(1,1,1)
-loading.Font = Enum.Font.SourceSans
-loading.TextSize = 20
-loading.Text = "Loading..."
-loading.TextTransparency = 1
-
--- FADE IN LOADER
-for i=0,1,0.05 do
-	loaderFrame.BackgroundTransparency = 1-i
-	loaderTitle.TextTransparency = 1-i
-	loading.TextTransparency = 1-i
-	task.wait(0.03)
-end
-
-task.wait(1)
-loading.Text = "Loading Complete!"
-loading.TextColor3 = Color3.fromRGB(0,255,0)
-task.wait(0.5)
-for i=0,1,0.05 do
-	loaderFrame.BackgroundTransparency = i
-	loaderTitle.TextTransparency = i
-	loading.TextTransparency = i
-	task.wait(0.03)
-end
-
--- Xóa Loader
-loaderGui:Destroy()
-
---------------------------------------------------
--- 🔹 ANIMATIONS CHO NHÂN VẬT
---------------------------------------------------
-local animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
-
-local teleAnim = Instance.new("Animation")
-teleAnim.AnimationId = "rbxassetid://15957361339"
-local teleTrack = animator:LoadAnimation(teleAnim)
-teleTrack.Priority = Enum.AnimationPriority.Action
-
-local flyAnim = Instance.new("Animation")
-flyAnim.AnimationId = "rbxassetid://134743839442030"
-local flyTrack = animator:LoadAnimation(flyAnim)
-flyTrack.Priority = Enum.AnimationPriority.Action
-flyTrack.Looped = true
-
-player.CharacterAdded:Connect(function(char)
-	humanoid = char:WaitForChild("Humanoid")
-	animator = humanoid:FindFirstChildOfClass("Animator") or Instance.new("Animator", humanoid)
-
-	teleTrack = animator:LoadAnimation(teleAnim)
-	teleTrack.Priority = Enum.AnimationPriority.Action
-
-	flyTrack = animator:LoadAnimation(flyAnim)
-	flyTrack.Priority = Enum.AnimationPriority.Action
-	flyTrack.Looped = true
-end)
-
-print("🔥 Solo Leveling System Accepted")
 
 -----------------------------------------------------
 -- 🧭 MAIN UI
@@ -569,7 +585,7 @@ local function createLeftLabel(txt, index)
 end
  
 local leftItems = {
-	"R - Teleport","T - Teleport Player","U - Teleport Sky",
+	"R - Teleport,Flycam","T - Teleport Player","U - Teleport Sky",
 	"Y - Fly Mode","C - Aimbot","X - Noclip","Z - Speed Max",
 	"V - Teleport Void","H - OMG Teleport","Created by Thinneee"
 }
