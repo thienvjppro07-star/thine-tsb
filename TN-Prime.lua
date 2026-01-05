@@ -323,96 +323,88 @@ end)
 print("🔥 Solo Leveling System Accepted")
 
 --------------------------------------------------
--- MOBILE R BUTTON (TOGGLE TELE MODE + DRAGGABLE)
+-- 📱 MOBILE R BUTTON (KÉO ĐƯỢC)
 --------------------------------------------------
-local teleMode = false
-
--- GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "MobileRTele"
+gui.Name = "MobileRKey"
 gui.ResetOnSpawn = false
 gui.Parent = player:WaitForChild("PlayerGui")
 
 local rBtn = Instance.new("TextButton")
-rBtn.Size = UDim2.new(0, 70, 0, 70)
-rBtn.Position = UDim2.new(1, -90, 1, -180)
-rBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-rBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-rBtn.TextScaled = true
-rBtn.Font = Enum.Font.GothamBold
+rBtn.Size = UDim2.new(0, 48, 0, 48)
+rBtn.Position = UDim2.new(1, -70, 1, -150)
 rBtn.Text = "R"
+rBtn.Font = Enum.Font.GothamBold
+rBtn.TextScaled = true
+rBtn.TextColor3 = Color3.new(1,1,1)
+rBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 rBtn.AutoButtonColor = false
 rBtn.Parent = gui
-rBtn.Visible = UIS.TouchEnabled
-
-local corner = Instance.new("UICorner", rBtn)
-corner.CornerRadius = UDim.new(0, 14)
+Instance.new("UICorner", rBtn).CornerRadius = UDim.new(1,0)
 
 --------------------------------------------------
--- BUTTON STATE COLOR
+-- UPDATE BUTTON COLOR
 --------------------------------------------------
 local function updateBtn()
-	if teleMode then
-		rBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
+	if state == STATE_TELE then
+		rBtn.BackgroundColor3 = Color3.fromRGB(0,170,255)
+	elseif state == STATE_FLY then
+		rBtn.BackgroundColor3 = Color3.fromRGB(255,120,0)
 	else
-		rBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+		rBtn.BackgroundColor3 = Color3.fromRGB(45,45,45)
 	end
 end
 updateBtn()
 
 --------------------------------------------------
--- TOGGLE TELE MODE
+-- HOLD CONFIG
 --------------------------------------------------
-rBtn.MouseButton1Click:Connect(function()
-	if flyCam then return end
-	teleMode = not teleMode
+local HOLD_TIME = 0.3
+local holding = false
+local holdStart = 0
+
+--------------------------------------------------
+-- BUTTON INPUT
+--------------------------------------------------
+rBtn.InputBegan:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.Touch then return end
+
+	holding = true
+	holdStart = tick()
+
+	task.delay(HOLD_TIME, function()
+		if holding and state ~= STATE_FLY then
+			-- HOLD → FLYCAM
+			state = STATE_FLY
+			updateBtn()
+		end
+	end)
+end)
+
+rBtn.InputEnded:Connect(function(input)
+	if input.UserInputType ~= Enum.UserInputType.Touch then return end
+
+	-- TAP (KHÔNG HOLD)
+	if holding then
+		if state == STATE_NORMAL then
+			state = STATE_TELE
+		elseif state == STATE_TELE then
+			state = STATE_NORMAL
+		elseif state == STATE_FLY then
+			state = STATE_TELE -- thoát fly → tele
+		end
+	end
+
+	holding = false
 	updateBtn()
 end)
 
 --------------------------------------------------
--- DRAG LOGIC (MOBILE)
---------------------------------------------------
-local dragging = false
-local dragStart
-local startPos
-
-local function updateDrag(input)
-	local delta = input.Position - dragStart
-	rBtn.Position = UDim2.new(
-		startPos.X.Scale,
-		startPos.X.Offset + delta.X,
-		startPos.Y.Scale,
-		startPos.Y.Offset + delta.Y
-	)
-end
-
-rBtn.InputBegan:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		dragging = true
-		dragStart = input.Position
-		startPos = rBtn.Position
-	end
-end)
-
-rBtn.InputEnded:Connect(function(input)
-	if input.UserInputType == Enum.UserInputType.Touch then
-		dragging = false
-	end
-end)
-
-UIS.InputChanged:Connect(function(input)
-	if dragging and input.UserInputType == Enum.UserInputType.Touch then
-		updateDrag(input)
-	end
-end)
-
---------------------------------------------------
--- TOUCH MAP TO TELEPORT
+-- 📱 TAP MÀN HÌNH ĐỂ TELE
 --------------------------------------------------
 UIS.TouchTap:Connect(function(pos, gp)
-	if not teleMode then return end
-	if flyCam then return end
 	if gp then return end
+	if state ~= STATE_TELE then return end
 
 	local ray = camera:ViewportPointToRay(pos.X, pos.Y)
 	local params = RaycastParams.new()
@@ -424,7 +416,6 @@ UIS.TouchTap:Connect(function(pos, gp)
 		doTeleport(result.Position + Vector3.new(0, 2.5, 0))
 	end
 end)
-
 
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
