@@ -1,0 +1,150 @@
+--------------------------------------------------
+-- KEY SYSTEM (FINAL)
+--------------------------------------------------
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local player = Players.LocalPlayer
+
+-- GUI
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "CK_KeySystem"
+gui.ResetOnSpawn = false
+
+-- MAIN FRAME
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 420, 0, 260)
+main.Position = UDim2.new(0.5, -210, 0.5, -130)
+main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+main.BackgroundTransparency = 0.15
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 14)
+
+-- BORDER (ANIM COLOR)
+local stroke = Instance.new("UIStroke", main)
+stroke.Thickness = 4
+stroke.Color = Color3.fromRGB(0,170,255)
+
+task.spawn(function()
+	while true do
+		TweenService:Create(stroke, TweenInfo.new(2), {
+			Color = Color3.fromRGB(170,0,255)
+		}):Play()
+		task.wait(2)
+		TweenService:Create(stroke, TweenInfo.new(2), {
+			Color = Color3.fromRGB(0,170,255)
+		}):Play()
+		task.wait(2)
+	end
+end)
+
+-- BACKGROUND IMAGE
+local bg = Instance.new("ImageLabel", main)
+bg.Size = UDim2.new(1,0,1,0)
+bg.Image = "rbxassetid://106391699425936"
+bg.BackgroundTransparency = 1
+bg.ImageTransparency = 0.35
+bg.ScaleType = Enum.ScaleType.Crop
+Instance.new("UICorner", bg).CornerRadius = UDim.new(0,14)
+
+-- CLOSE BUTTON (TẮT LUÔN)
+local close = Instance.new("TextButton", main)
+close.Size = UDim2.new(0,30,0,30)
+close.Position = UDim2.new(1,-35,0,5)
+close.Text = "X"
+close.Font = Enum.Font.GothamBold
+close.TextSize = 18
+close.TextColor3 = Color3.fromRGB(255,80,80)
+close.BackgroundTransparency = 1
+close.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
+
+-- TITLE
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1,0,0,40)
+title.Position = UDim2.new(0,0,0,10)
+title.BackgroundTransparency = 1
+title.Text = "Cid Kagenou Hub | Key System"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 18
+title.TextColor3 = Color3.fromRGB(200,200,255)
+
+-- TEXTBOX KEY
+local keyBox = Instance.new("TextBox", main)
+keyBox.Size = UDim2.new(0.8,0,0,40)
+keyBox.Position = UDim2.new(0.1,0,0,80)
+keyBox.PlaceholderText = "Enter Key..."
+keyBox.Text = ""
+keyBox.Font = Enum.Font.Gotham
+keyBox.TextSize = 16
+keyBox.TextColor3 = Color3.new(1,1,1)
+keyBox.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0,8)
+
+-- BUTTON CREATOR
+local function makeBtn(text, pos)
+	local b = Instance.new("TextButton", main)
+	b.Size = UDim2.new(0.35,0,0,36)
+	b.Position = pos
+	b.Text = text
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.TextColor3 = Color3.fromRGB(230,230,230)
+	b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0,8)
+	return b
+end
+
+local getKeyBtn = makeBtn("Get Key", UDim2.new(0.1,0,0,140))
+local checkKeyBtn = makeBtn("Check Key", UDim2.new(0.55,0,0,140))
+
+-- FLOATING TEXT
+local function floatingText(txt)
+	local t = Instance.new("TextLabel", gui)
+	t.Size = UDim2.new(0,400,0,40)
+	t.Position = UDim2.new(0.5,-200,0.5,0)
+	t.BackgroundTransparency = 1
+	t.Text = txt
+	t.Font = Enum.Font.GothamBold
+	t.TextSize = 22
+	t.TextColor3 = Color3.fromRGB(180,180,255)
+
+	TweenService:Create(t, TweenInfo.new(2), {
+		Position = t.Position - UDim2.new(0,0,0.1,0),
+		TextTransparency = 1
+	}):Play()
+
+	task.delay(2, function()
+		t:Destroy()
+	end)
+end
+
+--------------------------------------------------
+-- GET KEY
+--------------------------------------------------
+local discordLink = "https://discord.gg/YOURDISCORD"
+
+getKeyBtn.MouseButton1Click:Connect(function()
+	setclipboard(discordLink)
+	floatingText("Join Discord to get key")
+end)
+
+--------------------------------------------------
+-- CHECK KEY + LOAD SCRIPT
+--------------------------------------------------
+local CORRECT_KEY = "ckhub0712" -- 🔴 ĐỔI KEY Ở ĐÂY
+
+checkKeyBtn.MouseButton1Click:Connect(function()
+	if keyBox.Text == CORRECT_KEY then
+		floatingText("Key Correct!")
+
+		task.wait(0.3)
+		gui:Destroy()
+
+		-- 🔥 LOAD SCRIPT CỦA M
+		loadstring(game:HttpGet(
+			"https://raw.githubusercontent.com/thienvjppro07-star/thine-tsb/refs/heads/main/CKHub"
+		))()
+	else
+		floatingText("Wrong Key!")
+	end
+end)
