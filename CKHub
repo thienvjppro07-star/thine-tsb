@@ -218,7 +218,9 @@ end
 --------------------------------------------------
 
 addScript(lists["Tech"], "Kiba tech (Akira)", "https://raw.githubusercontent.com/officialakira/Akira-Hub/refs/heads/main/akira%20tech.lua")
-addScript(lists["Tech"], "Empty Slot", "https://example.com")
+addScript(lists["Tech"], "Oreo tech", "https://raw.githubusercontent.com/Cyborg883/OreoTech/refs/heads/main/Protected_6856895483929371.lua")
+addScript(lists["Tech"], "Instant twisted tech", "https://raw.githubusercontent.com/thienvjppro07-star/thine-tsb/refs/heads/main/Instant%20twisted")
+
 
 addScript(lists["Moveset"], "Gojo (Saitama)", "https://raw.githubusercontent.com/skibiditoiletfan2007/BaldyToSorcerer/refs/heads/main/LatestV2.lua")
 addScript(lists["Moveset"], "TrashCan (Saitama)", "https://raw.githubusercontent.com/yes1nt/yes/refs/heads/main/Trashcan%20Man")
