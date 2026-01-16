@@ -1,0 +1,312 @@
+--// SERVICES
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local player = Players.LocalPlayer
+
+--------------------------------------------------
+-- SCREEN GUI
+--------------------------------------------------
+local gui = Instance.new("ScreenGui", player.PlayerGui)
+gui.Name = "CidKagenouHub"
+gui.ResetOnSpawn = false
+
+--------------------------------------------------
+-- MAIN GUI
+--------------------------------------------------
+local TweenService = game:GetService("TweenService")
+
+local main = Instance.new("Frame", gui)
+main.Size = UDim2.new(0, 500, 0, 360)
+main.Position = UDim2.new(0.5, -250, 0.5, -180)
+main.BackgroundColor3 = Color3.fromRGB(15,15,15)
+main.Visible = false
+main.Transparency = 0.2
+main.ZIndex = 1
+Instance.new("UICorner", main).CornerRadius = UDim.new(0, 10)
+
+--------------------------------------------------
+-- BACKGROUND IMAGE (INSIDE MAIN)
+--------------------------------------------------
+local bg = Instance.new("ImageLabel")
+bg.Parent = main
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.Position = UDim2.new(0, 0, 0, 0)
+bg.Image = "rbxassetid://106391699425936"
+bg.BackgroundTransparency = 1
+bg.ImageTransparency = 0.4 -- độ mờ nền
+bg.ScaleType = Enum.ScaleType.Crop
+bg.ZIndex = 0
+Instance.new("UICorner", bg).CornerRadius = UDim.new(0, 10)
+
+--------------------------------------------------
+-- BORDER GRADIENT (BLUE <-> PURPLE)
+--------------------------------------------------
+local stroke = Instance.new("UIStroke")
+stroke.Parent = main
+stroke.Thickness = 4
+stroke.Color = Color3.fromRGB(0, 170, 255) -- xanh ban đầu
+stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+stroke.Transparency = 0
+
+-- TWEEN CHUYỂN MÀU
+local tweenInfo = TweenInfo.new(
+	2.5, -- thời gian đổi màu (càng lớn càng mượt)
+	Enum.EasingStyle.Sine,
+	Enum.EasingDirection.InOut,
+	-1, -- lặp vô hạn
+	true -- đảo màu xanh <-> tím
+)
+
+local goal = {
+	Color = Color3.fromRGB(170, 0, 255) -- tím
+}
+
+local borderTween = TweenService:Create(stroke, tweenInfo, goal)
+borderTween:Play()
+
+--------------------------------------------------
+-- TITLE
+--------------------------------------------------
+local title = Instance.new("TextLabel", main)
+title.Size = UDim2.new(1, -60, 0, 45)
+title.Position = UDim2.new(0, 15, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Cid Kagenou Hub"
+title.TextColor3 = Color3.fromRGB(0,170,255)
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Active = true
+
+--------------------------------------------------
+-- CLOSE BUTTON
+--------------------------------------------------
+local closeBtn = Instance.new("TextButton", main)
+closeBtn.Size = UDim2.new(0, 36, 0, 36)
+closeBtn.Position = UDim2.new(1, -46, 0, 5)
+closeBtn.Text = "X"
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 18
+closeBtn.TextColor3 = Color3.fromRGB(255,80,80)
+closeBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+Instance.new("UICorner", closeBtn).CornerRadius = UDim.new(0, 6)
+
+--------------------------------------------------
+-- CONFIRM FRAME
+--------------------------------------------------
+local confirm = Instance.new("Frame", gui)
+confirm.Size = UDim2.new(0, 420, 0, 220)
+confirm.Position = UDim2.new(0.5, -210, 0.5, -110)
+confirm.BackgroundColor3 = Color3.fromRGB(22,22,22)
+confirm.Visible = false
+Instance.new("UICorner", confirm).CornerRadius = UDim.new(0, 10)
+
+local confirmText = Instance.new("TextLabel", confirm)
+confirmText.Size = UDim2.new(1, -30, 0, 100)
+confirmText.Position = UDim2.new(0, 15, 0, 20)
+confirmText.BackgroundTransparency = 1
+confirmText.Text = "Are you sure you want to remove Cid Kagenou Hub?"
+confirmText.TextWrapped = true
+confirmText.TextColor3 = Color3.fromRGB(255,255,255)
+confirmText.Font = Enum.Font.Gotham
+confirmText.TextSize = 17
+
+local yesBtn = Instance.new("TextButton", confirm)
+yesBtn.Size = UDim2.new(0, 150, 0, 45)
+yesBtn.Position = UDim2.new(0, 40, 1, -65)
+yesBtn.Text = "Yes"
+yesBtn.Font = Enum.Font.GothamBold
+yesBtn.TextSize = 16
+yesBtn.TextColor3 = Color3.fromRGB(255,255,255)
+yesBtn.BackgroundColor3 = Color3.fromRGB(200,60,60)
+Instance.new("UICorner", yesBtn).CornerRadius = UDim.new(0, 8)
+
+local noBtn = Instance.new("TextButton", confirm)
+noBtn.Size = UDim2.new(0, 150, 0, 45)
+noBtn.Position = UDim2.new(1, -190, 1, -65)
+noBtn.Text = "No"
+noBtn.Font = Enum.Font.GothamBold
+noBtn.TextSize = 16
+noBtn.TextColor3 = Color3.fromRGB(255,255,255)
+noBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
+Instance.new("UICorner", noBtn).CornerRadius = UDim.new(0, 8)
+
+--------------------------------------------------
+-- TAB BUTTONS
+--------------------------------------------------
+local tabs = {}
+local tabNames = {"Tech","Moveset","3L","4L"}
+
+for i,name in ipairs(tabNames) do
+	local b = Instance.new("TextButton", main)
+	b.Size = UDim2.new(0, 80, 0, 30)
+	b.Position = UDim2.new(0, 0 + (i-0.8)*90, 0, 50)
+	b.Text = name
+	b.Font = Enum.Font.GothamBold
+	b.TextSize = 14
+	b.TextColor3 = Color3.fromRGB(255,255,255)
+	b.BackgroundColor3 = Color3.fromRGB(30,30,30)
+	Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
+	tabs[name] = b
+end
+
+--------------------------------------------------
+-- SCRIPT LIST CREATOR
+--------------------------------------------------
+local lists = {}
+
+local function createList()
+    local sf = Instance.new("ScrollingFrame", main)
+    sf.Size = UDim2.new(1, -30, 1, -100)
+    sf.Position = UDim2.new(0, 15, 0, 90)
+    sf.CanvasSize = UDim2.new(0,0,0,0)
+
+    sf.BackgroundTransparency = 1      -- NỀN TRONG SUỐT
+    sf.BorderSizePixel = 0
+    sf.ScrollBarImageTransparency = 1  -- ẨN THANH SCROLL
+
+    sf.Visible = false
+
+
+	local layout = Instance.new("UIListLayout", sf)
+	layout.Padding = UDim.new(0, 8)
+
+	layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+		sf.CanvasSize = UDim2.new(0,0,0,layout.AbsoluteContentSize.Y + 10)
+	end)
+
+	return sf
+end
+
+for _,n in ipairs(tabNames) do
+	lists[n] = createList()
+end
+
+local function addScript(list, name, url)
+	local row = Instance.new("Frame", list)
+	row.Size = UDim2.new(1, 0, 0, 40)
+	row.BackgroundColor3 = Color3.fromRGB(22,22,22)
+	Instance.new("UICorner", row).CornerRadius = UDim.new(0, 6)
+
+	local label = Instance.new("TextLabel", row)
+	label.Size = UDim2.new(1, -110, 1, 0)
+	label.Position = UDim2.new(0, 10, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = name
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.TextColor3 = Color3.fromRGB(255,255,255)
+	label.Font = Enum.Font.Gotham
+	label.TextSize = 14
+
+	local run = Instance.new("TextButton", row)
+	run.Size = UDim2.new(0, 80, 0, 28)
+	run.Position = UDim2.new(1, -90, 0.5, -14)
+	run.Text = "RUN"
+	run.Font = Enum.Font.GothamBold
+	run.TextSize = 14
+	run.TextColor3 = Color3.fromRGB(255,255,255)
+	run.BackgroundColor3 = Color3.fromRGB(0,170,255)
+	Instance.new("UICorner", run).CornerRadius = UDim.new(0, 6)
+
+	run.MouseButton1Click:Connect(function()
+		loadstring(game:HttpGet(url))()
+	end)
+end
+
+--------------------------------------------------
+-- ADD SCRIPTS (M TỰ THÊM TIẾP)
+--------------------------------------------------
+
+addScript(lists["Tech"], "Kiba tech (Akira)", "https://raw.githubusercontent.com/officialakira/Akira-Hub/refs/heads/main/akira%20tech.lua")
+addScript(lists["Tech"], "Empty Slot", "https://example.com")
+
+addScript(lists["Moveset"], "Gojo (Saitama)", "https://raw.githubusercontent.com/skibiditoiletfan2007/BaldyToSorcerer/refs/heads/main/LatestV2.lua")
+addScript(lists["Moveset"], "TrashCan (Saitama)", "https://raw.githubusercontent.com/yes1nt/yes/refs/heads/main/Trashcan%20Man")
+
+
+
+addScript(lists["3L"], "Empty Slot", "https://example.com")
+addScript(lists["4L"], "Empty Slot", "https://example.com")
+
+--------------------------------------------------
+-- TAB LOGIC
+--------------------------------------------------
+local function openTab(name)
+	for _,l in pairs(lists) do l.Visible = false end
+	lists[name].Visible = true
+end
+
+for n,b in pairs(tabs) do
+	b.MouseButton1Click:Connect(function()
+		openTab(n)
+	end)
+end
+
+openTab("Tech")
+
+--------------------------------------------------
+-- FLOAT BUTTON
+--------------------------------------------------
+local floatBtn = Instance.new("ImageButton", gui)
+floatBtn.Size = UDim2.new(0, 60, 0, 60)
+floatBtn.Position = UDim2.new(0, 20, 0.5, -30)
+floatBtn.Image = "rbxassetid://137619363676102"
+floatBtn.BackgroundColor3 = Color3.fromRGB(25,25,25)
+Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(0, 8)
+
+--------------------------------------------------
+-- DRAG FLOAT BUTTON
+--------------------------------------------------
+local dragBtn, ds, sp
+floatBtn.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragBtn = true ds = i.Position sp = floatBtn.Position
+	end
+end)
+UIS.InputChanged:Connect(function(i)
+	if dragBtn and i.UserInputType == Enum.UserInputType.MouseMovement then
+		local d = i.Position - ds
+		floatBtn.Position = UDim2.new(sp.X.Scale, sp.X.Offset + d.X, sp.Y.Scale, sp.Y.Offset + d.Y)
+	end
+end)
+UIS.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 then dragBtn = false end
+end)
+
+--------------------------------------------------
+-- DRAG MAIN GUI
+--------------------------------------------------
+local dragMain, ds2, sp2
+title.InputBegan:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragMain = true ds2 = i.Position sp2 = main.Position
+	end
+end)
+UIS.InputChanged:Connect(function(i)
+	if dragMain and i.UserInputType == Enum.UserInputType.MouseMovement then
+		local d = i.Position - ds2
+		main.Position = UDim2.new(sp2.X.Scale, sp2.X.Offset + d.X, sp2.Y.Scale, sp2.Y.Offset + d.Y)
+	end
+end)
+UIS.InputEnded:Connect(function(i)
+	if i.UserInputType == Enum.UserInputType.MouseButton1 then dragMain = false end
+end)
+
+--------------------------------------------------
+-- FINAL LOGIC
+--------------------------------------------------
+floatBtn.MouseButton1Click:Connect(function()
+	main.Visible = not main.Visible
+end)
+
+closeBtn.MouseButton1Click:Connect(function()
+	confirm.Visible = true
+end)
+
+noBtn.MouseButton1Click:Connect(function()
+	confirm.Visible = false
+end)
+
+yesBtn.MouseButton1Click:Connect(function()
+	gui:Destroy()
+end)
