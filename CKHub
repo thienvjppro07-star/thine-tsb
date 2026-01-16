@@ -224,7 +224,8 @@ addScript(lists["Tech"], "Instant twisted tech", "https://raw.githubusercontent.
 
 addScript(lists["Moveset"], "Gojo (Saitama)", "https://raw.githubusercontent.com/skibiditoiletfan2007/BaldyToSorcerer/refs/heads/main/LatestV2.lua")
 addScript(lists["Moveset"], "TrashCan (Saitama)", "https://raw.githubusercontent.com/yes1nt/yes/refs/heads/main/Trashcan%20Man")
-
+addScript(lists["Moveset"], "Anti-Spiral (Saitama)", "https://raw.githubusercontent.com/sparksnaps/Anti-Spiral./refs/heads/main/Lua")
+addScript(lists["Moveset"], "Cosmic Garou (Garou)", "https://pastebin.com/raw/kT3Z8rse")
 
 
 addScript(lists["3L"], "Empty Slot", "https://example.com")
