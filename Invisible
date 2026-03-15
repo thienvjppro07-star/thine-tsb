@@ -1,0 +1,12 @@
+--[[
+ .____                  ________ ___.    _____                           __                
+ |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
+ |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
+ |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
+ |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
+         \/          \/         \/    \/                \/     \/     \/                   
+          \_Welcome to LuaObfuscator.com   (Alpha 0.10.9) ~  Much Love, Ferib 
+
+]]--
+
+local v0=game.Players.LocalPlayer;local v1=v0.Character or v0.CharacterAdded:Wait() ;local v2=game:GetService("UserInputService");local v3=Instance.new("ScreenGui");v3.Parent=v0.PlayerGui;local v6=Instance.new("Frame");v6.Size=UDim2.new(0,200,0,120);v6.Position=UDim2.new(0.5, -100,0.5, -60);v6.BackgroundColor3=Color3.fromRGB(30,30,30);v6.Active=true;v6.Parent=v3;local v12=Instance.new("TextLabel");v12.Size=UDim2.new(1,0,0,40);v12.BackgroundTransparency=1;v12.Text="Invisible";v12.TextScaled=true;v12.TextColor3=Color3.new(1,1,1);v12.Parent=v6;local v19=Instance.new("TextButton");v19.Size=UDim2.new(0.8,0,0,40);v19.Position=UDim2.new(0.1,0,0.5,0);v19.Text="OFF";v19.TextScaled=true;v19.BackgroundColor3=Color3.fromRGB(255,0,0);v19.Parent=v6;local v26=false;v19.MouseButton1Click:Connect(function() v26= not v26;for v34,v35 in pairs(v1:GetDescendants()) do if v35:IsA("BasePart") then v35.Transparency=(v26 and 1) or 0 ;end end if v26 then v19.Text="ON";v19.BackgroundColor3=Color3.fromRGB(0,255,0);else v19.Text="OFF";v19.BackgroundColor3=Color3.fromRGB(255,0,0);end end);local v27=false;local v28;local v29;local v30;v6.InputBegan:Connect(function(v31) if (v31.UserInputType==Enum.UserInputType.MouseButton1) then v27=true;v29=v31.Position;v30=v6.Position;v31.Changed:Connect(function() if (v31.UserInputState==Enum.UserInputState.End) then v27=false;end end);end end);v6.InputChanged:Connect(function(v32) if (v32.UserInputType==Enum.UserInputType.MouseMovement) then v28=v32;end end);v2.InputChanged:Connect(function(v33) if ((v33==v28) and v27) then local v42=v33.Position-v29 ;v6.Position=UDim2.new(v30.X.Scale,v30.X.Offset + v42.X ,v30.Y.Scale,v30.Y.Offset + v42.Y );end end);
